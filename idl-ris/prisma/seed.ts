@@ -4,18 +4,18 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const existing = await prisma.user.findUnique({ where: { email: 'admin@interiorduct.com' } });
+  const existing = await prisma.user.findUnique({ where: { email: 'admin' } });
   if (!existing) {
     await prisma.user.create({
       data: {
-        email: 'admin@interiorduct.com',
-        firstName: 'Interior',
-        lastName: 'Duct',
+        email: 'admin',
+        firstName: 'Admin',
+        lastName: 'User',
         role: 'ADMIN',
-        password: bcrypt.hashSync('Admin123!', 10)
+        password: bcrypt.hashSync('admin', 10)
       }
     });
-    console.log('Created default admin account: admin@interiorduct.com / Admin123!');
+    console.log('Created default admin account: admin / admin');
   }
 }
 

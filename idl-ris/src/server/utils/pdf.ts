@@ -1,5 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { type Document as DocumentModel, type DocumentLineItem, type Customer, type Supplier } from '@prisma/client';
+import path from 'path';
+import fs from 'fs';
 
 interface PdfDocumentPayload {
   document: DocumentModel & { lineItems: DocumentLineItem[] };
@@ -15,6 +17,17 @@ export function buildDocumentPdf(payload: PdfDocumentPayload) {
 
   doc.on('data', (chunk) => chunks.push(chunk));
   doc.on('end', () => undefined);
+
+  // Add logo at the top
+  const logoPath = path.join(__dirname, '../../public/logo.png');
+  if (fs.existsSync(logoPath)) {
+    try {
+      doc.image(logoPath, { fit: [60, 60], align: 'left' });
+      doc.moveDown(0.3);
+    } catch (error) {
+      console.warn('Could not load logo image:', error);
+    }
+  }
 
   doc.fontSize(20).fillColor('#0f172a').text('Interior Duct Ltd', { align: 'left' });
   doc.moveDown(0.4);

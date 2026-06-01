@@ -1,16 +1,17 @@
 import express, { json, urlencoded } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-// import authRoutes from './routes/auth';
-// import customerRoutes from './routes/customers';
-// import supplierRoutes from './routes/suppliers';
-// import inventoryRoutes from './routes/inventory';
-// import documentRoutes from './routes/documents';
-// import loanRoutes from './routes/loans';
-// import reportRoutes from './routes/reports';
-// import auditRoutes from './routes/audit';
-// import uploadRoutes from './routes/uploads';
-// import prisma from './db';
+import path from 'path';
+import authRoutes from './routes/auth';
+import customerRoutes from './routes/customers';
+import supplierRoutes from './routes/suppliers';
+import inventoryRoutes from './routes/inventory';
+import documentRoutes from './routes/documents';
+import loanRoutes from './routes/loans';
+import reportRoutes from './routes/reports';
+import auditRoutes from './routes/audit';
+import uploadRoutes from './routes/uploads';
+import prisma from './db';
 
 dotenv.config();
 
@@ -21,15 +22,18 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(json({ limit: '10mb' }));
 app.use(urlencoded({ extended: true, limit: '10mb' }));
 
-// app.use('/api/auth', authRoutes);
-// app.use('/api/customers', customerRoutes);
-// app.use('/api/suppliers', supplierRoutes);
-// app.use('/api/inventory', inventoryRoutes);
-// app.use('/api/documents', documentRoutes);
-// app.use('/api/loans', loanRoutes);
-// app.use('/api/reports', reportRoutes);
-// app.use('/api/audit', auditRoutes);
-// app.use('/api/uploads', uploadRoutes);
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, '../../public')));
+
+app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/suppliers', supplierRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/documents', documentRoutes);
+app.use('/api/loans', loanRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
@@ -39,7 +43,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 async function start() {
-  // await prisma.$connect();
+  await prisma.$connect();
   app.listen(PORT, () => {
     console.log(`✓ IDL-RIS backend listening at http://localhost:${PORT}`);
   });
