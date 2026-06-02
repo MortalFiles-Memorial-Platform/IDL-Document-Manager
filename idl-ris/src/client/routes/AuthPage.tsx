@@ -19,13 +19,13 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
     const errors: Record<string, string> = {};
     if (!email.trim()) {
       errors.email = 'Email is required.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (email !== 'admin' && email !== 'interiorductltd@gmail.com' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       errors.email = 'Enter a valid email address.';
     }
     if (!password) {
       errors.password = 'Password is required.';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters.';
+    } else if (password.length < 5) {
+      errors.password = 'Password must be at least 5 characters.';
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -54,6 +54,9 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
   return (
     <div className="mx-auto flex min-h-screen max-w-xl items-center justify-center px-4 py-16">
       <div className="w-full rounded-3xl border border-slate-200 bg-white p-10 shadow-lg shadow-slate-200/70">
+        <div className="mb-6 flex justify-center">
+          <img src="/logo.png" alt="Interior Duct Ltd" className="h-16 w-16" />
+        </div>
         <h1 className="text-3xl font-semibold text-slate-900">Interior Duct Ltd Login</h1>
         <p className="mt-2 text-sm text-slate-500">Access the IDL-RIS business document manager and stay compliant with Nigerian financial workflows.</p>
 
@@ -63,8 +66,8 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
             <Input
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="user@interiorduct.com"
-              type="email"
+              placeholder="interiorductltd@gmail.com"
+              type="text"
               required
               className={fieldErrors.email ? 'border-rose-500' : ''}
             />

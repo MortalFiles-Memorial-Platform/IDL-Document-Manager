@@ -17,8 +17,11 @@ export default function Sidebar({ user }: { user: UserProfile }) {
   return (
     <aside className="hidden w-80 shrink-0 border-r border-slate-200 bg-slate-50 p-6 lg:block">
       <div className="mb-10 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="text-xs uppercase tracking-[0.35em] text-slate-500">IDL-RIS Portal</p>
-        <h2 className="mt-4 text-xl font-semibold text-slate-900">Welcome, {user.firstName}</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <img src="/logo.png" alt="Interior Duct Ltd" className="h-10 w-10 rounded-lg" />
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-500">IDL-RIS Portal</p>
+        </div>
+        <h2 className="text-xl font-semibold text-slate-900">Welcome, {user.firstName}</h2>
         <p className="mt-2 text-sm text-slate-500">Manage documents, customers, inventory, approvals and compliance from one secure system.</p>
       </div>
       <nav className="space-y-2">

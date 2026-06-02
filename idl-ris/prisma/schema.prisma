@@ -3,62 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:dev.db"
 }
 
-enum Role {
-  ADMIN
-  FINANCE
-  SALES
-  PROCUREMENT
-  INVENTORY
-  TRAINING
-  AUDITOR
-}
-
-enum DocumentType {
-  SALES_RECEIPT
-  CASH_RECEIPT
-  SALES_INVOICE
-  PROFORMA_INVOICE
-  QUOTATION
-  DELIVERY_NOTE
-  PAYMENT_VOUCHER
-  IMPREST_VOUCHER
-  EXPENSE_VOUCHER
-  PURCHASE_RECEIPT
-  PURCHASE_INVOICE
-  LOAN_RECEIPT
-  LOAN_REPAYMENT_RECEIPT
-  SERVICE_COMPLETION_CERTIFICATE
-}
-
-enum DocumentStatus {
-  OPEN
-  PAID
-  PARTIAL
-  CANCELED
-}
-
-enum ApprovalStatus {
-  DRAFT
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum ExpenseStatus {
-  PENDING
-  APPROVED
-  PAID
-}
-
-enum LoanStatus {
-  ACTIVE
-  CLOSED
-  DEFAULTED
-}
 
 model User {
   id         Int        @id @default(autoincrement())
@@ -66,12 +14,13 @@ model User {
   password   String
   firstName  String
   lastName   String
-  role       Role       @default(SALES)
+  role       String     @default("SALES")
   isActive   Boolean    @default(true)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   documents  Document[] @relation("CreatedBy")
   approvals  Document[] @relation("ApprovedBy")
+  expenses   Expense[]
   auditLogs  AuditLog[]
 }
 
@@ -94,8 +43,9 @@ model Supplier {
   contactEmail String
   phone        String
   address      String
-  tin          String?    
+  tin          String?
   notes        String?
+  documents    Document[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -106,7 +56,7 @@ model InventoryItem {
   name        String
   category    String
   unit        String
-  unitPrice   Decimal
+  unitPrice   Float
   quantity    Int
   reorderLevel Int     @default(5)
   location    String
@@ -118,10 +68,10 @@ model Expense {
   id         Int          @id @default(autoincrement())
   reference  String       @unique
   category   String
-  amount     Decimal
+  amount     Float
   date       DateTime
   paidBy     String
-  status     ExpenseStatus @default(PENDING)
+  status     String       @default("PENDING")
   notes      String?
   createdBy  User         @relation(fields: [createdById], references: [id])
   createdById Int
@@ -132,12 +82,12 @@ model Expense {
 model Loan {
   id          Int           @id @default(autoincrement())
   borrower    String
-  principal   Decimal
-  outstanding Decimal
+  principal   Float
+  outstanding Float
   interestRate Float
   currency     String        @default("NGN")
   dueDate      DateTime
-  status       LoanStatus    @default(ACTIVE)
+  status       String        @default("ACTIVE")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   repayments   LoanRepayment[]
@@ -147,7 +97,7 @@ model LoanRepayment {
   id         Int      @id @default(autoincrement())
   loan       Loan     @relation(fields: [loanId], references: [id])
   loanId     Int
-  amount     Decimal
+  amount     Float
   paidAt     DateTime @default(now())
   receiptRef String
   createdAt  DateTime @default(now())
@@ -155,7 +105,7 @@ model LoanRepayment {
 
 model Document {
   id                Int              @id @default(autoincrement())
-  docType           DocumentType
+  docType           String
   reference         String           @unique
   customer          Customer?        @relation(fields: [customerId], references: [id])
   customerId        Int?
@@ -163,14 +113,14 @@ model Document {
   supplierId        Int?
   issueDate         DateTime         @default(now())
   dueDate           DateTime?
-  status            DocumentStatus   @default(OPEN)
-  approvalStatus    ApprovalStatus   @default(DRAFT)
+  status            String           @default("OPEN")
+  approvalStatus    String           @default("DRAFT")
   currency          String           @default("NGN")
-  totalAmount       Decimal
-  vatAmount         Decimal
-  discountAmount    Decimal
-  amountPaid        Decimal
-  balanceDue        Decimal
+  totalAmount       Float
+  vatAmount         Float
+  discountAmount    Float
+  amountPaid        Float
+  balanceDue        Float
   transactionStatus String
   signedBy          String?
   customerSignatureUrl String?
@@ -192,10 +142,10 @@ model DocumentLineItem {
   description String
   quantity    Int
   unit        String
-  unitPrice   Decimal
-  discount    Decimal
-  vat         Decimal
-  total       Decimal
+  unitPrice   Float
+  discount    Float
+  vat         Float
+  total       Float
 }
 
 model AuditLog {
