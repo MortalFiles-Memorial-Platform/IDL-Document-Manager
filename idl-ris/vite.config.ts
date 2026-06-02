@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
-  base: process.env.NODE_ENV === 'production' ? '/saveweb2zip-com-freeaiden-com/' : '/',
+  base: '/IDL-Document-Manager/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
