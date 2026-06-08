@@ -17,60 +17,71 @@ router.get('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT', 'AUDI
 });
 
 router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req, res) => {
-  const { docType, reference, customerId, supplierId, issueDate, dueDate, transactionStatus, signedBy, customerSignatureUrl, lineItems, amountPaid, transactionStatus: statusValue } = req.body;
-  const parsedItems = Array.isArray(lineItems) ? lineItems.map((item: any) => ({
-    description: item.description,
-    quantity: Number(item.quantity || 0),
-    unit: item.unit,
-    unitPrice: Number(item.unitPrice || 0),
-    discount: Number(item.discount || 0),
-    vat: Number(item.vat || 0),
-    total: Number(item.total || 0)
-  })) : [];
-  const totalAmount = parsedItems.reduce((sum, item) => sum + item.total, 0);
-  const vatAmount = parsedItems.reduce((sum, item) => sum + (item.vat || 0), 0);
-  const discountAmount = parsedItems.reduce((sum, item) => sum + (item.discount || 0), 0);
-  const paidAmount = Number(amountPaid || 0);
-  const balanceDue = totalAmount - paidAmount;
+  try {
+    const { docType, reference, customerId, supplierId, issueDate, dueDate, transactionStatus, signedBy, customerSignatureUrl, lineItems, amountPaid, transactionStatus: statusValue } = req.body;
+    const parsedItems = Array.isArray(lineItems) ? lineItems.map((item: any) => ({
+      description: item.description,
+      quantity: Number(item.quantity || 0),
+      unit: item.unit,
+      unitPrice: Number(item.unitPrice || 0),
+      discount: Number(item.discount || 0),
+      vat: Number(item.vat || 0),
+      total: Number(item.total || 0)
+    })) : [];
+    const totalAmount = parsedItems.reduce((sum, item) => sum + item.total, 0);
+    const vatAmount = parsedItems.reduce((sum, item) => sum + (item.vat || 0), 0);
+    const discountAmount = parsedItems.reduce((sum, item) => sum + (item.discount || 0), 0);
+    const paidAmount = Number(amountPaid || 0);
+    const balanceDue = totalAmount - paidAmount;
 
-  const qrCodeData = JSON.stringify({ reference, docType, totalAmount, balanceDue, issuedAt: new Date().toISOString() });
-  const qrCodeUri = await createQRCodeDataUri(qrCodeData);
+    const qrCodeData = JSON.stringify({ reference, docType, totalAmount, balanceDue, issuedAt: new Date().toISOString() });
+    const qrCodeUri = await createQRCodeDataUri(qrCodeData);
 
-  const document = await prisma.document.create({
-    data: {
-      docType,
-      reference,
-      customerId: customerId ? Number(customerId) : undefined,
-      supplierId: supplierId ? Number(supplierId) : undefined,
-      issueDate: issueDate ? new Date(issueDate) : new Date(),
-      dueDate: dueDate ? new Date(dueDate) : undefined,
-      status: paidAmount >= totalAmount ? 'PAID' : paidAmount > 0 ? 'PARTIAL' : 'OPEN',
-      approvalStatus: 'DRAFT',
-      currency: 'NGN',
-      totalAmount,
-      vatAmount,
-      discountAmount,
-      amountPaid: paidAmount,
-      balanceDue,
-      transactionStatus: statusValue || 'UNSET',
-      signedBy,
-      customerSignatureUrl,
-      qrCodeData,
-      lineItems: {
-        create: parsedItems
-      },
-      createdById: req.user!.id
+    const document = await prisma.document.create({
+      data: {
+        docType,
+        reference,
+        customerId: customerId ? Number(customerId) : undefined,
+        supplierId: supplierId ? Number(supplierId) : undefined,
+        issueDate: issueDate ? new Date(issueDate) : new Date(),
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+        status: paidAmount >= totalAmount ? 'PAID' : paidAmount > 0 ? 'PARTIAL' : 'OPEN',
+        approvalStatus: 'DRAFT',
+        currency: 'NGN',
+        totalAmount,
+        vatAmount,
+        discountAmount,
+        amountPaid: paidAmount,
+        balanceDue,
+        transactionStatus: statusValue || 'UNSET',
+        signedBy,
+        customerSignatureUrl,
+        qrCodeData,
+        lineItems: {
+          create: parsedItems
+        },
+        createdById: req.user!.id
+      }
+    });
+
+    const payload = await prisma.document.findUnique({ where: { id: document.id }, include: { lineItems: true, customer: true, supplier: true } });
+
+    let documentUrl = '';
+    try {
+      const pdfBuffer = buildDocumentPdf({ document: payload as any, customer: payload?.customer || undefined, supplier: payload?.supplier || undefined, qrCodeUri });
+      documentUrl = await uploadBufferToS3(pdfBuffer, `documents/${reference}.pdf`, 'application/pdf');
+      await prisma.document.update({ where: { id: document.id }, data: { documentUrl } });
+    } catch (pdfError) {
+      console.error('PDF generation/upload error:', pdfError);
     }
-  });
 
-  const payload = await prisma.document.findUnique({ where: { id: document.id }, include: { lineItems: true, customer: true, supplier: true } });
-  const pdfBuffer = buildDocumentPdf({ document: payload as any, customer: payload?.customer || undefined, supplier: payload?.supplier || undefined, qrCodeUri });
-  const url = await uploadBufferToS3(pdfBuffer, `documents/${reference}.pdf`, 'application/pdf');
-
-  await prisma.document.update({ where: { id: document.id }, data: { documentUrl: url } });
-  await logAudit('CREATE_DOCUMENT', 'Document', document.id, req.user?.id, `Created document ${reference}`);
-
-  res.status(201).json({ ...document, documentUrl: url });
+    await logAudit('CREATE_DOCUMENT', 'Document', document.id, req.user?.id, `Created document ${reference}`);
+    res.status(201).json({ ...document, documentUrl });
+  } catch (error) {
+    console.error('Document creation error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    res.status(400).json({ error: 'Failed to create document', details: message });
+  }
 });
 
 router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req, res) => {

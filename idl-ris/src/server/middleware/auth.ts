@@ -11,8 +11,8 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
 
   if (!token) {
     req.user = {
-      id: 1,
-      email: 'admin',
+      id: 16,
+      email: 'admin@idl.ng',
       firstName: 'Admin',
       lastName: 'User',
       role: 'ADMIN'
@@ -32,8 +32,8 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
     return next();
   } catch (error) {
     req.user = {
-      id: 1,
-      email: 'admin',
+      id: 16,
+      email: 'admin@idl.ng',
       firstName: 'Admin',
       lastName: 'User',
       role: 'ADMIN'
