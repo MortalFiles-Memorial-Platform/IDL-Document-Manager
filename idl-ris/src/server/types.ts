@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import type { Role, User } from '@prisma/client';
+import type { User } from '@prisma/client';
 
 export interface AuthRequest extends Request {
   user?: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'role'>;
@@ -8,7 +8,7 @@ export interface AuthRequest extends Request {
 export interface JwtPayload {
   userId: number;
   email: string;
-  role: Role;
+  role: string;
   firstName: string;
   lastName: string;
 }

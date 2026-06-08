@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import DashboardPage from './routes/DashboardPage';
 import DocumentsPage from './routes/DocumentsPage';
 import CustomersPage from './routes/CustomersPage';
@@ -8,27 +9,46 @@ import InventoryPage from './routes/InventoryPage';
 import LoansPage from './routes/LoansPage';
 import AuditLogsPage from './routes/AuditLogsPage';
 import ApprovalsPage from './routes/ApprovalsPage';
+import AuthPage from './routes/AuthPage';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import type { UserProfile } from './types';
-
-const defaultUser: UserProfile = {
-  id: 1,
-  email: 'admin@interiorduct.com',
-  firstName: 'Admin',
-  lastName: 'User',
-  role: 'ADMIN'
-};
 
 function App() {
-  const [user] = useState<UserProfile>(defaultUser);
+  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-300 border-t-brand-600"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <AuthPage
+        onLogin={async (profile, token) => {
+          navigate('/');
+        }}
+      />
+    );
+  }
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <div className="lg:flex lg:min-h-screen">
-        <Sidebar user={user} />
+        <Sidebar user={user!} />
         <main className="flex-1 p-6 lg:p-8">
-          <Header user={user} onLogout={() => {}} />
+          <Header user={user!} onLogout={handleLogout} />
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/documents" element={<DocumentsPage />} />

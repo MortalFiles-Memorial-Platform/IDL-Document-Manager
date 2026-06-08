@@ -1,16 +1,16 @@
 import { useState, type FormEvent } from 'react';
-import { api } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
-import type { UserProfile } from '../types';
 
 interface AuthPageProps {
-  onLogin: (profile: UserProfile, token: string) => void;
+  onLogin?: (profile: any, token: string) => void;
 }
 
 export default function AuthPage({ onLogin }: AuthPageProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const [email, setEmail] = useState('admin');
+  const [password, setPassword] = useState('admin');
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -42,8 +42,8 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password });
-      onLogin(response.data.user, response.data.token);
+      const result = await login(email, password);
+      onLogin?.(result.user, result.token);
     } catch (err) {
       setError('Login failed. Verify email and password.');
     } finally {
@@ -66,7 +66,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
             <Input
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="interiorductltd@gmail.com"
+              placeholder="admin or interiorductltd@gmail.com"
               type="text"
               required
               className={fieldErrors.email ? 'border-rose-500' : ''}
@@ -88,7 +88,9 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</Button>
         </form>
+        <p className="mt-4 text-xs text-slate-500">Demo: Use email "admin" and password "admin"</p>
       </div>
     </div>
   );
 }
+

@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: 'tests',
   timeout: 30000,
   use: {
-    baseURL: 'http://localhost:5173/IDL-Document-Manager/',
+    baseURL: 'http://localhost:5174/IDL-Document-Manager/',
     headless: true,
     viewport: { width: 1280, height: 800 },
     actionTimeout: 5000,
