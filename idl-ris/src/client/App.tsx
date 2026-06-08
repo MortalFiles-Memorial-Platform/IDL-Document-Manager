@@ -15,6 +15,7 @@ import BalanceSheetPage from './routes/BalanceSheetPage';
 import AuthPage from './routes/AuthPage';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import MobileNav from './components/MobileNav';
 
 function App() {
   const BYPASS_AUTH = true;
@@ -49,9 +50,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
+      <MobileNav user={user!} />
       <div className="lg:flex lg:min-h-screen">
         <Sidebar user={user!} />
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-4 pt-20 lg:pt-0 lg:p-8">
           <Header user={user!} onLogout={handleLogout} />
           <Routes>
             <Route path="/" element={<DashboardPage />} />

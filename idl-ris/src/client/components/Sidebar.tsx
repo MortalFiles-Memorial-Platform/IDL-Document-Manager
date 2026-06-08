@@ -21,7 +21,7 @@ export default function Sidebar({ user }: { user: UserProfile }) {
     <aside className="hidden w-80 shrink-0 border-r border-slate-200 bg-slate-50 p-6 lg:block">
       <Link to="/" className="mb-10 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm block hover:shadow-md transition">
         <div className="flex items-center gap-3 mb-3">
-          <img src={new URL('/logo.png', window.location.origin).href} alt="Interior Duct Ltd" className="h-10 w-10 rounded-lg" />
+          <img src="/IDL-Document-Manager/logo.png" alt="Interior Duct Ltd" className="h-10 w-10 rounded-lg object-cover" />
           <p className="text-xs uppercase tracking-[0.35em] text-slate-500">IDL-RIS Portal</p>
         </div>
         <h2 className="text-xl font-semibold text-slate-900">Welcome, {user.firstName}</h2>

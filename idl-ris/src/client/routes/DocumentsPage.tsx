@@ -42,6 +42,7 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
     { description: 'Service', quantity: 1, unit: 'unit', unitPrice: 0, discount: 0, vat: 0, total: 0 }
   ]);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isReceipt = docType.includes('RECEIPT');
   const isVoucher = docType.includes('VOUCHER');
@@ -86,6 +87,7 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateDocument()) {
+      setIsSubmitting(true);
       onSubmit({
         docType,
         reference,
@@ -98,6 +100,7 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
         issueDate: new Date().toISOString(),
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       });
+      setTimeout(() => setIsSubmitting(false), 2000);
     }
   };
 
@@ -232,8 +235,8 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
         </div>
       </div>
 
-      <Button type="submit" className="w-full">
-        Create {docType.replace(/_/g, ' ')}
+      <Button type="submit" disabled={isSubmitting} className="w-full">
+        {isSubmitting ? '⏳ Creating...' : `✓ Create ${docType.replace(/_/g, ' ')}`}
       </Button>
     </form>
   );
@@ -243,6 +246,8 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [template, setTemplate] = useState(documentTypes[0]);
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [previewDocumentId, setPreviewDocumentId] = useState<number | null>(null);
   const [previewDocument, setPreviewDocument] = useState<any | null>(null);
 
@@ -255,18 +260,26 @@ export default function DocumentsPage() {
       const response = await api.get('/documents');
       setDocuments(response.data);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to fetch documents:', error);
+      setErrorMessage('Failed to load documents');
     }
   };
 
   const handleSubmit = async (data: any) => {
     setSubmitting(true);
+    setErrorMessage('');
+    setSuccessMessage('');
     try {
-      await api.post('/documents', data);
-      fetchDocuments();
+      console.log('Submitting document:', data);
+      const response = await api.post('/documents', data);
+      console.log('Document created successfully:', response.data);
+      setSuccessMessage(`✓ ${data.docType.replace(/_/g, ' ')} created successfully!`);
+      await fetchDocuments();
       setTemplate(documentTypes[0]);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to create document:', error);
+      setErrorMessage(`Failed to create document: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSubmitting(false);
     }
@@ -287,6 +300,18 @@ export default function DocumentsPage() {
               <p className="mt-1 text-sm text-slate-500">Form adapts based on document type selected.</p>
             </div>
           </div>
+
+          {successMessage && (
+            <div className="mb-4 rounded-2xl bg-emerald-50 p-3 text-sm text-emerald-700 border border-emerald-200">
+              {successMessage}
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mb-4 rounded-2xl bg-rose-50 p-3 text-sm text-rose-700 border border-rose-200">
+              {errorMessage}
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-slate-700 mb-2">
