@@ -30,6 +30,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^1.17.0",
+    "nodemailer": "^8.0.10",
     "pdfkit": "^0.14.0",
     "qrcode": "^1.5.1",
     "react": "^18.3.1",
