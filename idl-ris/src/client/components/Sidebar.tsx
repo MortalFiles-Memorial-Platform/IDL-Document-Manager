@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import type { UserProfile } from '../types';
-import { FileText, Users, Box, ClipboardList, ShieldCheck, CheckCircle2, Database, Layers } from 'lucide-react';
+import { FileText, Users, Box, ClipboardList, ShieldCheck, CheckCircle2, Database, Layers, BarChart3, PieChart } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: Database },
@@ -10,7 +10,9 @@ const navItems = [
   { path: '/inventory', label: 'Inventory', icon: Layers },
   { path: '/loans', label: 'Loans', icon: ClipboardList },
   { path: '/approvals', label: 'Approvals', icon: CheckCircle2 },
-  { path: '/audit', label: 'Audit Logs', icon: ShieldCheck }
+  { path: '/audit', label: 'Audit Logs', icon: ShieldCheck },
+  { path: '/financial-dashboard', label: 'Financial Dashboard', icon: BarChart3 },
+  { path: '/financial-reports', label: 'Financial Reports', icon: PieChart }
 ];
 
 export default function Sidebar({ user }: { user: UserProfile }) {

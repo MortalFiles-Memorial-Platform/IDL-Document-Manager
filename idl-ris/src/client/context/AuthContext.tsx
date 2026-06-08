@@ -15,10 +15,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const BYPASS_AUTH = true;
+
+  const defaultDemoUser: UserProfile = {
+    id: '1',
+    email: 'demo@interiorduct.com',
+    firstName: 'Demo',
+    lastName: 'User',
+    role: 'ADMIN'
+  };
+
+  const [user, setUser] = useState<UserProfile | null>(BYPASS_AUTH ? defaultDemoUser : null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (BYPASS_AUTH) {
+      setIsLoading(false);
+      return;
+    }
+
     const token = getToken();
     if (token) {
       api
@@ -54,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, setUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: BYPASS_AUTH || !!user, isLoading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

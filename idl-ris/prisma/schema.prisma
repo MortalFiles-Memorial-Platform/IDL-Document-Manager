@@ -9,19 +9,20 @@ datasource db {
 
 
 model User {
-  id         Int        @id @default(autoincrement())
-  email      String     @unique
-  password   String
-  firstName  String
-  lastName   String
-  role       String     @default("SALES")
-  isActive   Boolean    @default(true)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  documents  Document[] @relation("CreatedBy")
-  approvals  Document[] @relation("ApprovedBy")
-  expenses   Expense[]
-  auditLogs  AuditLog[]
+  id            Int              @id @default(autoincrement())
+  email         String           @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          String           @default("SALES")
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  documents     Document[]       @relation("CreatedBy")
+  approvals     Document[]       @relation("ApprovedBy")
+  expenses      Expense[]
+  auditLogs     AuditLog[]
+  journalEntries JournalEntry[]
 }
 
 model Customer {
@@ -104,35 +105,36 @@ model LoanRepayment {
 }
 
 model Document {
-  id                Int              @id @default(autoincrement())
-  docType           String
-  reference         String           @unique
-  customer          Customer?        @relation(fields: [customerId], references: [id])
-  customerId        Int?
-  supplier          Supplier?        @relation(fields: [supplierId], references: [id])
-  supplierId        Int?
-  issueDate         DateTime         @default(now())
-  dueDate           DateTime?
-  status            String           @default("OPEN")
-  approvalStatus    String           @default("DRAFT")
-  currency          String           @default("NGN")
-  totalAmount       Float
-  vatAmount         Float
-  discountAmount    Float
-  amountPaid        Float
-  balanceDue        Float
-  transactionStatus String
-  signedBy          String?
+  id                   Int                @id @default(autoincrement())
+  docType              String
+  reference            String             @unique
+  customer             Customer?          @relation(fields: [customerId], references: [id])
+  customerId           Int?
+  supplier             Supplier?          @relation(fields: [supplierId], references: [id])
+  supplierId           Int?
+  issueDate            DateTime           @default(now())
+  dueDate              DateTime?
+  status               String             @default("OPEN")
+  approvalStatus       String             @default("DRAFT")
+  currency             String             @default("NGN")
+  totalAmount          Float
+  vatAmount            Float
+  discountAmount       Float
+  amountPaid           Float
+  balanceDue           Float
+  transactionStatus    String
+  signedBy             String?
   customerSignatureUrl String?
-  documentUrl       String?
-  qrCodeData        String?
-  lineItems         DocumentLineItem[]
-  createdBy         User             @relation("CreatedBy", fields: [createdById], references: [id])
-  createdById       Int
-  approvedBy        User?            @relation("ApprovedBy", fields: [approvedById], references: [id])
-  approvedById      Int?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  documentUrl          String?
+  qrCodeData           String?
+  lineItems            DocumentLineItem[]
+  journalEntries       JournalEntry[]
+  createdBy            User               @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById          Int
+  approvedBy           User?              @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedById         Int?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 }
 
 model DocumentLineItem {
@@ -158,3 +160,36 @@ model AuditLog {
   timestamp DateTime @default(now())
   details   String?
 }
+
+model ChartOfAccounts {
+  id              Int             @id @default(autoincrement())
+  code            String          @unique
+  name            String
+  type            String          // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  balance         Float           @default(0)
+  currency        String          @default("NGN")
+  isActive        Boolean         @default(true)
+  debitEntries    JournalEntry[]  @relation("Debit")
+  creditEntries   JournalEntry[]  @relation("Credit")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model JournalEntry {
+  id              Int             @id @default(autoincrement())
+  reference       String
+  description     String
+  entryDate       DateTime
+  debitAccountId  Int
+  creditAccountId Int
+  amount          Float
+  document        Document?       @relation(fields: [documentId], references: [id])
+  documentId      Int?
+  debitAccount    ChartOfAccounts @relation("Debit", fields: [debitAccountId], references: [id])
+  creditAccount   ChartOfAccounts @relation("Credit", fields: [creditAccountId], references: [id])
+  createdBy       User            @relation(fields: [createdById], references: [id])
+  createdById     Int
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
