@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const BYPASS_AUTH = true;
 
   const defaultDemoUser: UserProfile = {
-    id: '1',
+    id: 1,
     email: 'demo@interiorduct.com',
     firstName: 'Demo',
     lastName: 'User',

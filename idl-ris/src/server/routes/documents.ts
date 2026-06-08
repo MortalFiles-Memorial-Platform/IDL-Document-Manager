@@ -75,13 +75,14 @@ router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), asy
 
 router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req, res) => {
   const id = Number(req.params.id);
+  const posStyle = req.query.style === 'pos';
   const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
   if (!document) {
     return res.status(404).json({ message: 'Document not found.' });
   }
 
   const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
-  const pdfBuffer = buildDocumentPdf({ document: document as any, customer: document.customer, supplier: document.supplier, qrCodeUri });
+  const pdfBuffer = buildDocumentPdf({ document: document as any, customer: document.customer, supplier: document.supplier, qrCodeUri, posStyle });
   res.setHeader('Content-Type', 'application/pdf');
   res.send(pdfBuffer);
 });

@@ -9,6 +9,9 @@ import InventoryPage from './routes/InventoryPage';
 import LoansPage from './routes/LoansPage';
 import AuditLogsPage from './routes/AuditLogsPage';
 import ApprovalsPage from './routes/ApprovalsPage';
+import GeneralLedgerPage from './routes/GeneralLedgerPage';
+import ProfitLossPage from './routes/ProfitLossPage';
+import BalanceSheetPage from './routes/BalanceSheetPage';
 import AuthPage from './routes/AuthPage';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -59,6 +62,9 @@ function App() {
             <Route path="/loans" element={<LoansPage />} />
             <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/audit" element={<AuditLogsPage />} />
+            <Route path="/general-ledger" element={<GeneralLedgerPage />} />
+            <Route path="/profit-loss" element={<ProfitLossPage />} />
+            <Route path="/balance-sheet" element={<BalanceSheetPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
