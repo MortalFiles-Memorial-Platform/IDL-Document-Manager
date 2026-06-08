@@ -18,7 +18,7 @@ import Sidebar from './components/Sidebar';
 import MobileNav from './components/MobileNav';
 
 function App() {
-  const BYPASS_AUTH = true;
+  const BYPASS_AUTH = false;  // ⚠️ CHANGE TO TRUE ONLY FOR DEVELOPMENT/DEMO
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
   const navigate = useNavigate();
 
