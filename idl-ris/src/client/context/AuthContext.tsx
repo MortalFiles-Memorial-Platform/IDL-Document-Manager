@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getToken, setToken, removeToken } from '../lib/auth';
 import { api } from '../lib/api';
+import { mockAuthService } from '../lib/mockAuth';
 import type { UserProfile } from '../types';
 
 interface AuthContextType {
