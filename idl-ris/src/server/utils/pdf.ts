@@ -152,7 +152,7 @@ export function buildDocumentPdf(payload: PdfDocumentPayload) {
     const logoPath = path.join(__dirname, '../../public/logo.png');
     if (fs.existsSync(logoPath)) {
       try {
-        doc.image(logoPath, { fit: [60, 60], align: 'left' });
+        doc.image(logoPath, { fit: [60, 60] });
         doc.moveDown(0.3);
       } catch (error) {
         console.warn('Could not load logo image:', error);
@@ -227,7 +227,7 @@ export function buildDocumentPdf(payload: PdfDocumentPayload) {
     doc.moveDown(1);
 
     if (qrCodeUri) {
-      doc.image(qrCodeUri, { fit: [120, 120], align: 'left' });
+      doc.image(qrCodeUri, { fit: [120, 120] });
       doc.moveDown(0.5);
       doc.fontSize(8).text('Scan the QR code to verify the document record.', { width: 250 });
     }

@@ -8,16 +8,17 @@ import { generateDocumentImage } from '../utils/image';
 import { uploadBufferToS3 } from '../utils/s3';
 import { sendDocumentEmail } from '../utils/email';
 import { logAudit } from '../utils/audit';
+import type { AuthRequest } from '../types';
 
 const router = Router();
 router.use(authenticateToken);
 
-router.get('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT', 'AUDITOR'), async (req, res) => {
+router.get('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT', 'AUDITOR'), async (req: AuthRequest, res) => {
   const docs = await prisma.document.findMany({ include: { customer: true, supplier: true, lineItems: true }, orderBy: { createdAt: 'desc' } });
   res.json(docs);
 });
 
-router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req, res) => {
+router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req: AuthRequest, res) => {
   try {
     const { docType, reference, customerId, supplierId, issueDate, dueDate, transactionStatus, signedBy, customerSignatureUrl, lineItems, amountPaid, transactionStatus: statusValue } = req.body;
     const parsedItems = Array.isArray(lineItems) ? lineItems.map((item: any) => ({
@@ -85,7 +86,7 @@ router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), asy
   }
 });
 
-router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   try {
     const id = Number(req.params.id);
     const posStyle = req.query.style === 'pos';
@@ -113,7 +114,7 @@ router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), a
   }
 });
 
-router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   try {
     const id = Number(req.params.id);
     const format = (req.query.format as string) || 'png';
@@ -148,7 +149,7 @@ router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'),
   }
 });
 
-router.post('/:id/send-email', authorizeRoles('ADMIN', 'SALES', 'FINANCE'), async (req, res) => {
+router.post('/:id/send-email', authorizeRoles('ADMIN', 'SALES', 'FINANCE'), async (req: AuthRequest, res) => {
   try {
     const id = Number(req.params.id);
     const { to, subject, message } = req.body;
@@ -169,7 +170,7 @@ router.post('/:id/send-email', authorizeRoles('ADMIN', 'SALES', 'FINANCE'), asyn
   }
 });
 
-router.put('/:id/status', authorizeRoles('ADMIN', 'FINANCE'), async (req, res) => {
+router.put('/:id/status', authorizeRoles('ADMIN', 'FINANCE'), async (req: AuthRequest, res) => {
   const id = Number(req.params.id);
   const { approvalStatus, status, approvedById } = req.body;
   const document = await prisma.document.update({ where: { id }, data: { approvalStatus, status, approvedById: approvedById ? Number(approvedById) : undefined } });

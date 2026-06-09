@@ -3,16 +3,17 @@ import prisma from '../db';
 import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/roles';
 import { logAudit } from '../utils/audit';
+import type { AuthRequest } from '../types';
 
 const router = Router();
 router.use(authenticateToken);
 
-router.get('/', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   const loans = await prisma.loan.findMany({ include: { repayments: true }, orderBy: { createdAt: 'desc' } });
   res.json(loans);
 });
 
-router.post('/', authorizeRoles('ADMIN', 'FINANCE'), async (req, res) => {
+router.post('/', authorizeRoles('ADMIN', 'FINANCE'), async (req: AuthRequest, res) => {
   const { borrower, principal, interestRate, dueDate, currency } = req.body;
   const loan = await prisma.loan.create({
     data: {
@@ -28,7 +29,7 @@ router.post('/', authorizeRoles('ADMIN', 'FINANCE'), async (req, res) => {
   res.status(201).json(loan);
 });
 
-router.post('/:id/repay', authorizeRoles('ADMIN', 'FINANCE'), async (req, res) => {
+router.post('/:id/repay', authorizeRoles('ADMIN', 'FINANCE'), async (req: AuthRequest, res) => {
   const id = Number(req.params.id);
   const { amount, receiptRef } = req.body;
   const loan = await prisma.loan.findUnique({ where: { id } });
