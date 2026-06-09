@@ -18,6 +18,12 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
 
+console.log('Server configuration:');
+console.log(`- PORT: ${PORT}`);
+console.log(`- DATABASE_URL: ${process.env.DATABASE_URL ? '✓ Set' : '✗ Not set'}`);
+console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+console.log('');
+
 app.use(cors({ origin: true, credentials: true }));
 app.use(json({ limit: '10mb' }));
 app.use(urlencoded({ extended: true, limit: '10mb' }));
@@ -44,18 +50,20 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 
 async function start() {
   try {
+    console.log('Connecting to database...');
     await prisma.$connect();
     console.log('✓ Database connected');
   } catch (error) {
-    console.warn('⚠ Database connection failed (may be initializing):', error instanceof Error ? error.message : error);
+    console.error('✗ Database connection failed:', error instanceof Error ? error.message : error);
+    console.log('⚠ Starting server without database (will fail on first request)');
   }
 
-  app.listen(PORT, () => {
-    console.log(`✓ IDL-RIS backend listening at http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✓ IDL-RIS backend listening on port ${PORT}`);
   });
 }
 
 start().catch((error) => {
-  console.error('Failed to start server', error);
+  console.error('✗ Failed to start server:', error);
   process.exit(1);
 });
