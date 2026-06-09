@@ -3,11 +3,12 @@ import { Buffer } from 'buffer';
 import { uploadBufferToS3 } from '../utils/s3';
 import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/roles';
+import type { AuthRequest } from '../types';
 
 const router = Router();
 router.use(authenticateToken);
 
-router.post('/signature', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req, res) => {
+router.post('/signature', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req: AuthRequest, res) => {
   const { fileName, contentType, base64Data } = req.body;
   if (!fileName || !contentType || !base64Data) {
     return res.status(400).json({ message: 'fileName, contentType and base64Data are required.' });

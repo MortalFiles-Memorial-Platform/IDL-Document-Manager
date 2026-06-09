@@ -2,11 +2,12 @@ import { Router } from 'express';
 import prisma from '../db';
 import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/roles';
+import type { AuthRequest } from '../types';
 
 const router = Router();
 router.use(authenticateToken);
 
-router.get('/', authorizeRoles('ADMIN', 'AUDITOR'), async (req, res) => {
+router.get('/', authorizeRoles('ADMIN', 'AUDITOR'), async (req: AuthRequest, res) => {
   const logs = await prisma.auditLog.findMany({ orderBy: { timestamp: 'desc' }, take: 200 });
   res.json(logs);
 });

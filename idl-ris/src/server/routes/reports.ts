@@ -2,11 +2,12 @@ import { Router } from 'express';
 import prisma from '../db';
 import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/roles';
+import type { AuthRequest } from '../types';
 
 const router = Router();
 router.use(authenticateToken);
 
-router.get('/dashboard', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR', 'SALES'), async (req, res) => {
+router.get('/dashboard', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR', 'SALES'), async (req: AuthRequest, res) => {
   const totalCustomers = await prisma.customer.count();
   const totalSuppliers = await prisma.supplier.count();
   const totalInventory = await prisma.inventoryItem.count();
@@ -24,7 +25,7 @@ router.get('/dashboard', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR', 'SALES'),
   });
 });
 
-router.get('/general-ledger', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/general-ledger', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   const { startDate, endDate } = req.query;
   const where: any = {};
 
@@ -47,7 +48,7 @@ router.get('/general-ledger', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), asy
   res.json(entries);
 });
 
-router.get('/chart-of-accounts', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/chart-of-accounts', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   const accounts = await prisma.chartOfAccounts.findMany({
     where: { isActive: true },
     orderBy: { code: 'asc' }
@@ -56,7 +57,7 @@ router.get('/chart-of-accounts', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), 
   res.json(accounts);
 });
 
-router.get('/trial-balance', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/trial-balance', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   const accounts = await prisma.chartOfAccounts.findMany({
     where: { isActive: true },
     include: {
@@ -84,7 +85,7 @@ router.get('/trial-balance', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), asyn
   });
 });
 
-router.get('/profit-loss', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/profit-loss', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   res.json({
     revenue: { accounts: [], total: 0 },
     expenses: { accounts: [], total: 0 },
@@ -92,7 +93,7 @@ router.get('/profit-loss', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async 
   });
 });
 
-router.get('/balance-sheet', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req, res) => {
+router.get('/balance-sheet', authorizeRoles('ADMIN', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
   res.json({
     assets: { accounts: [], total: 0 },
     liabilities: { accounts: [], total: 0 },
