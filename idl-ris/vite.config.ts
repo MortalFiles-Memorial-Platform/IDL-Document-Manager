@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
-  base: '/IDL-Document-Manager/',
+  base: '/',
   define: {
     __BACKEND_URL__: JSON.stringify(process.env.VITE_BACKEND_URL || '')
   },
