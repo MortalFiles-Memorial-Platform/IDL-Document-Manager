@@ -6,8 +6,19 @@ const isGitHubPages = (): boolean => {
   return window.location.hostname === 'mortalfiles-memorial-platform.github.io';
 };
 
+const getBackendUrl = (): string => {
+  const backendUrl = (globalThis as any).__BACKEND_URL__;
+  if (backendUrl) {
+    return backendUrl;
+  }
+  return '';
+};
+
+const backendUrl = getBackendUrl();
+const baseURL = isGitHubPages() && backendUrl ? `${backendUrl}/api` : '/api';
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
