@@ -10,14 +10,7 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
 
   if (!token) {
-    req.user = {
-      id: 16,
-      email: 'admin@idl.ng',
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'ADMIN'
-    };
-    return next();
+    return res.status(401).json({ message: 'Unauthorized: token required.' });
   }
 
   try {
@@ -31,13 +24,6 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
     };
     return next();
   } catch (error) {
-    req.user = {
-      id: 16,
-      email: 'admin@idl.ng',
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'ADMIN'
-    };
-    return next();
+    return res.status(401).json({ message: 'Unauthorized: invalid token.' });
   }
 }
