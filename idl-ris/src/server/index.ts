@@ -28,8 +28,11 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(json({ limit: '10mb' }));
 app.use(urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files from public folder
-app.use(express.static(path.join(__dirname, '../../public')));
+// Serve built client files
+app.use(express.static(path.join(__dirname, '../../dist')));
+
+// Health check endpoint
+app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
@@ -41,7 +44,10 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/uploads', uploadRoutes);
 
-app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+// SPA fallback: serve index.html for all non-API routes
+app.get('*', (_, res) => {
+  res.sendFile(path.join(__dirname, '../../dist/index.html'));
+});
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
