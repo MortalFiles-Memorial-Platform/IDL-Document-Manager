@@ -4,6 +4,7 @@ import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/roles';
 import { createQRCodeDataUri } from '../utils/qrcode';
 import { buildDocumentPdf } from '../utils/pdf';
+import { generateDocumentImage } from '../utils/image';
 import { uploadBufferToS3 } from '../utils/s3';
 import { sendDocumentEmail } from '../utils/email';
 import { logAudit } from '../utils/audit';
@@ -68,7 +69,7 @@ router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), asy
 
     let documentUrl = '';
     try {
-      const pdfBuffer = buildDocumentPdf({ document: payload as any, customer: payload?.customer || undefined, supplier: payload?.supplier || undefined, qrCodeUri });
+      const pdfBuffer = await buildDocumentPdf({ document: payload as any, customer: payload?.customer || undefined, supplier: payload?.supplier || undefined, qrCodeUri });
       documentUrl = await uploadBufferToS3(pdfBuffer, `documents/${reference}.pdf`, 'application/pdf');
       await prisma.document.update({ where: { id: document.id }, data: { documentUrl } });
     } catch (pdfError) {
@@ -85,33 +86,87 @@ router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), asy
 });
 
 router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req, res) => {
-  const id = Number(req.params.id);
-  const posStyle = req.query.style === 'pos';
-  const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
-  if (!document) {
-    return res.status(404).json({ message: 'Document not found.' });
-  }
+  try {
+    const id = Number(req.params.id);
+    const posStyle = req.query.style === 'pos';
+    const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found.' });
+    }
 
-  const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
-  const pdfBuffer = buildDocumentPdf({ document: document as any, customer: document.customer, supplier: document.supplier, qrCodeUri, posStyle });
-  res.setHeader('Content-Type', 'application/pdf');
-  res.send(pdfBuffer);
+    const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
+    const pdfBuffer = await buildDocumentPdf({ document: document as any, customer: document.customer, supplier: document.supplier, qrCodeUri, posStyle });
+
+    // Set proper headers for PDF download
+    const filename = `${document.reference}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    res.status(500).json({ message: 'Failed to generate PDF', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const format = (req.query.format as string) || 'png';
+
+    if (!['png', 'jpg', 'jpeg'].includes(format.toLowerCase())) {
+      return res.status(400).json({ message: 'Invalid format. Use png or jpg.' });
+    }
+
+    const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found.' });
+    }
+
+    const imageSvg = generateDocumentImage({ document: document as any, customer: document.customer, supplier: document.supplier, format: format.toLowerCase() as 'png' | 'jpg' });
+
+    // Set proper headers for image download
+    const fileExtension = format.toLowerCase() === 'jpg' ? 'jpg' : 'png';
+    const filename = `${document.reference}.${fileExtension}`;
+    const contentType = format.toLowerCase() === 'jpg' ? 'image/jpeg' : 'image/png';
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', imageSvg.length);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    res.send(imageSvg);
+  } catch (error) {
+    console.error('Image generation error:', error);
+    res.status(500).json({ message: 'Failed to generate image', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
 });
 
 router.post('/:id/send-email', authorizeRoles('ADMIN', 'SALES', 'FINANCE'), async (req, res) => {
-  const id = Number(req.params.id);
-  const { to, subject, message } = req.body;
-  const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
-  if (!document) {
-    return res.status(404).json({ message: 'Document not found.' });
+  try {
+    const id = Number(req.params.id);
+    const { to, subject, message } = req.body;
+    const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found.' });
+    }
+
+    const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
+    const pdfBuffer = await buildDocumentPdf({ document: document as any, customer: document.customer, supplier: document.supplier, qrCodeUri });
+    await sendDocumentEmail(to, subject, message || 'Please find your document attached.', pdfBuffer);
+    await logAudit('EMAIL_DOCUMENT', 'Document', id, req.user?.id, `Sent document ${id} to ${to}`);
+
+    res.json({ message: 'Email sent successfully.' });
+  } catch (error) {
+    console.error('Email sending error:', error);
+    res.status(500).json({ message: 'Failed to send email', error: error instanceof Error ? error.message : 'Unknown error' });
   }
-
-  const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
-  const pdfBuffer = buildDocumentPdf({ document: document as any, customer: document.customer, supplier: document.supplier, qrCodeUri });
-  await sendDocumentEmail(to, subject, message || 'Please find your document attached.', pdfBuffer);
-  await logAudit('EMAIL_DOCUMENT', 'Document', id, req.user?.id, `Sent document ${id} to ${to}`);
-
-  res.json({ message: 'Email sent successfully.' });
 });
 
 router.put('/:id/status', authorizeRoles('ADMIN', 'FINANCE'), async (req, res) => {

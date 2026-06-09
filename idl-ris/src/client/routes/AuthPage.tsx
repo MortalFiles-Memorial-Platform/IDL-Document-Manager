@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 
 interface AuthPageProps {
   onLogin?: (profile: any, token: string) => void;
@@ -9,11 +10,12 @@ interface AuthPageProps {
 
 export default function AuthPage({ onLogin }: AuthPageProps) {
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@idl.ng');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const validate = () => {
     const errors: Record<string, string> = {};
@@ -49,11 +51,15 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
     }
   };
 
+  const handleForgotPasswordSubmit = async (forgotEmail: string) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+
   return (
     <div className="mx-auto flex min-h-screen max-w-xl items-center justify-center px-4 py-16">
       <div className="w-full rounded-3xl border border-slate-200 bg-white p-10 shadow-lg shadow-slate-200/70">
         <div className="mb-6 flex justify-center">
-          <img src="/logo.png" alt="Interior Duct Ltd" className="h-16 w-16" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Interior Duct Ltd" className="h-16 w-16" />
         </div>
         <h1 className="text-3xl font-semibold text-slate-900">Interior Duct Ltd Login</h1>
         <p className="mt-2 text-sm text-slate-500">Access the IDL-RIS business document manager and stay compliant with Nigerian financial workflows.</p>
@@ -76,7 +82,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
             <Input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter password"
               type="password"
               required
               className={fieldErrors.password ? 'border-rose-500' : ''}
@@ -85,9 +91,20 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</Button>
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="w-full text-sm text-slate-600 hover:text-slate-900 hover:underline"
+          >
+            Forgot password?
+          </button>
         </form>
-        <p className="mt-4 text-xs text-slate-500">Default Credentials: admin@idl.ng / password123 (or use finance@idl.ng, accounts@idl.ng, sales@idl.ng, inventory@idl.ng, maintenance@idl.ng, auditor@idl.ng)</p>
       </div>
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        onSubmit={handleForgotPasswordSubmit}
+      />
     </div>
   );
 }

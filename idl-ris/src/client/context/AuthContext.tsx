@@ -15,7 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const BYPASS_AUTH = true;  // ✅ Set to true for testing/demo, false for production
+  const BYPASS_AUTH = false;  // ✅ Set to false for production - requires real login
 
   const defaultDemoUser: UserProfile = {
     id: 1,

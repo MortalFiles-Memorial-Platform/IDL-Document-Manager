@@ -52,10 +52,24 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
   const isSales = docType.includes('SALES') || docType.includes('INVOICE') || docType.includes('QUOTATION');
 
   const totals = useMemo(() => {
-    const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
-    const vatAmount = lineItems.reduce((sum, item) => sum + item.vat, 0);
-    const discountAmount = lineItems.reduce((sum, item) => sum + item.discount, 0);
-    const balance = subtotal - amountPaid;
+    const subtotal = lineItems.reduce((sum, item) => {
+      const qty = Number(item.quantity) || 0;
+      const price = Number(item.unitPrice) || 0;
+      const discount = Number(item.discount) || 0;
+      return sum + (qty * price) - discount;
+    }, 0);
+
+    const vatAmount = lineItems.reduce((sum, item) => {
+      const qty = Number(item.quantity) || 0;
+      const price = Number(item.unitPrice) || 0;
+      const discount = Number(item.discount) || 0;
+      const itemSubtotal = (qty * price) - discount;
+      const vatPercentage = Number(item.vat) || 0;
+      return sum + (itemSubtotal * vatPercentage) / 100;
+    }, 0);
+
+    const discountAmount = lineItems.reduce((sum, item) => sum + Number(item.discount), 0);
+    const balance = subtotal + vatAmount - amountPaid;
     return { subtotal, vatAmount, discountAmount, balance };
   }, [lineItems, amountPaid]);
 
@@ -80,7 +94,16 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
     setLineItems((items) => {
       const next = [...items];
       next[index] = { ...next[index], [key]: value };
-      next[index].total = Number(next[index].quantity) * Number(next[index].unitPrice) - Number(next[index].discount) + Number(next[index].vat);
+
+      const quantity = Number(next[index].quantity) || 0;
+      const unitPrice = Number(next[index].unitPrice) || 0;
+      const discount = Number(next[index].discount) || 0;
+      const vatPercentage = Number(next[index].vat) || 0;
+
+      const subtotal = (quantity * unitPrice) - discount;
+      const vatAmount = (subtotal * vatPercentage) / 100;
+      next[index].total = subtotal + vatAmount;
+
       return next;
     });
   };
@@ -195,8 +218,17 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
                     <Input className="mt-1" type="number" value={item.discount} onChange={(e) => handleItemChange(index, 'discount', Number(e.target.value))} />
                   </label>
                   <label className="block text-sm font-medium text-slate-700">
-                    VAT
-                    <Input className="mt-1" type="number" value={item.vat} onChange={(e) => handleItemChange(index, 'vat', Number(e.target.value))} />
+                    VAT (%)
+                    <Input
+                      className="mt-1"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={item.vat}
+                      onChange={(e) => handleItemChange(index, 'vat', Number(e.target.value))}
+                      placeholder="e.g., 7.5"
+                    />
                   </label>
                 </>
               )}
@@ -211,28 +243,28 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
 
       <div className="bg-slate-50 p-4 rounded-3xl space-y-2">
         <div className="flex justify-between text-sm">
-          <span>Subtotal:</span>
-          <span className="font-medium">NGN {totals.subtotal.toFixed(2)}</span>
+          <span>Subtotal (after discount):</span>
+          <span className="font-medium">NGN {(totals.subtotal - totals.discountAmount).toFixed(2)}</span>
         </div>
         {!isVoucher && (
           <>
             {totals.discountAmount > 0 && (
               <div className="flex justify-between text-sm">
                 <span>Discount:</span>
-                <span className="font-medium">NGN {totals.discountAmount.toFixed(2)}</span>
+                <span className="font-medium">-NGN {totals.discountAmount.toFixed(2)}</span>
               </div>
             )}
             {totals.vatAmount > 0 && (
               <div className="flex justify-between text-sm">
-                <span>VAT:</span>
-                <span className="font-medium">NGN {totals.vatAmount.toFixed(2)}</span>
+                <span>VAT (calculated):</span>
+                <span className="font-medium">+NGN {totals.vatAmount.toFixed(2)}</span>
               </div>
             )}
           </>
         )}
         <div className="border-t border-slate-200 pt-2 flex justify-between font-bold">
           <span>Total:</span>
-          <span>NGN {totals.subtotal.toFixed(2)}</span>
+          <span>NGN {(totals.subtotal - totals.discountAmount + totals.vatAmount).toFixed(2)}</span>
         </div>
       </div>
 
@@ -359,6 +391,12 @@ export default function DocumentsPage() {
                   <Button onClick={() => openPreview(doc)}>Preview</Button>
                   <a className="inline-flex items-center justify-center rounded-2xl bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700" href={`/api/documents/${doc.id}/pdf`} target="_blank" rel="noreferrer">
                     PDF
+                  </a>
+                  <a className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700" href={`/api/documents/${doc.id}/image?format=png`} target="_blank" rel="noreferrer">
+                    PNG
+                  </a>
+                  <a className="inline-flex items-center justify-center rounded-2xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700" href={`/api/documents/${doc.id}/image?format=jpg`} target="_blank" rel="noreferrer">
+                    JPG
                   </a>
                   <a className="inline-flex items-center justify-center rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700" href={`/api/documents/${doc.id}/pdf?style=pos`} target="_blank" rel="noreferrer">
                     Receipt
