@@ -43,7 +43,13 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 async function start() {
-  await prisma.$connect();
+  try {
+    await prisma.$connect();
+    console.log('✓ Database connected');
+  } catch (error) {
+    console.warn('⚠ Database connection failed (may be initializing):', error instanceof Error ? error.message : error);
+  }
+
   app.listen(PORT, () => {
     console.log(`✓ IDL-RIS backend listening at http://localhost:${PORT}`);
   });
