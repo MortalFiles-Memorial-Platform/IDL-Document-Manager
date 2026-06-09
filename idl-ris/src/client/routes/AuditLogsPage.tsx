@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../../ui/card';
+import BackButton from '../components/BackButton';
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton label="Back to Dashboard" to="/dashboard" />
       <Card>
         <h2 className="text-xl font-semibold text-slate-900">Audit Logs</h2>
         <p className="mt-2 text-sm text-slate-500">View system audit events for security review, financial compliance, and internal review.</p>

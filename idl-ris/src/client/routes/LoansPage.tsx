@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { Input } from '../../ui/input';
+import BackButton from '../components/BackButton';
 
 export default function LoansPage() {
   const [loans, setLoans] = useState<any[]>([]);
@@ -21,6 +22,7 @@ export default function LoansPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton label="Back to Dashboard" to="/dashboard" />
       <Card>
         <h2 className="text-xl font-semibold text-slate-900">Loan Tracking</h2>
         <p className="mt-2 text-sm text-slate-500">Manage working capital loans, repayment schedules, and auditing documents for financing operations.</p>

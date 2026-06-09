@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { Input } from '../../ui/input';
+import BackButton from '../components/BackButton';
 
 const documentTypes = [
   'SALES_RECEIPT',
@@ -292,6 +293,7 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton label="Back to Dashboard" to="/dashboard" />
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">

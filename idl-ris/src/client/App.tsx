@@ -18,7 +18,7 @@ import Sidebar from './components/Sidebar';
 import MobileNav from './components/MobileNav';
 
 function App() {
-  const BYPASS_AUTH = true;  // ✅ Set to true for testing/demo, false for production
+  const BYPASS_AUTH = false;  // ✅ Set to true for testing/demo, false for production
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -37,7 +37,7 @@ function App() {
     return (
       <AuthPage
         onLogin={async (profile, token) => {
-          navigate('/');
+          navigate('/dashboard');
         }}
       />
     );
@@ -45,7 +45,7 @@ function App() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate('/login');
   };
 
   return (
@@ -56,7 +56,9 @@ function App() {
         <main className="flex-1 p-4 pt-20 lg:pt-0 lg:p-8">
           <Header user={user!} onLogout={handleLogout} />
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/login" element={<AuthPage onLogin={async () => navigate('/dashboard')} />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/documents" element={<DocumentsPage />} />
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/suppliers" element={<SuppliersPage />} />
@@ -67,7 +69,7 @@ function App() {
             <Route path="/general-ledger" element={<GeneralLedgerPage />} />
             <Route path="/profit-loss" element={<ProfitLossPage />} />
             <Route path="/balance-sheet" element={<BalanceSheetPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>

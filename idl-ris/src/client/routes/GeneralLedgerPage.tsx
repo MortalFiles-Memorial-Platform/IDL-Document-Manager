@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../../ui/card';
 import { Button } from '../../ui/button';
+import BackButton from '../components/BackButton';
 
 interface JournalEntry {
   id: number;
@@ -41,6 +42,7 @@ export default function GeneralLedgerPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton label="Back to Dashboard" to="/dashboard" />
       <div className="flex items-end gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-700">From Date</label>

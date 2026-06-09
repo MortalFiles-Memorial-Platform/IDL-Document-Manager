@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { Input } from '../../ui/input';
+import BackButton from '../components/BackButton';
 
 const approvalFilters = ['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'DRAFT'];
 
@@ -56,6 +57,7 @@ export default function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton label="Back to Dashboard" to="/dashboard" />
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../../ui/card';
+import BackButton from '../components/BackButton';
 
 interface BalanceSheetReport {
   assets: {
@@ -41,6 +42,7 @@ export default function BalanceSheetPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton label="Back to Dashboard" to="/dashboard" />
       {report && (
         <>
           <Card>

@@ -9,8 +9,8 @@ interface AuthPageProps {
 
 export default function AuthPage({ onLogin }: AuthPageProps) {
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin');
-  const [password, setPassword] = useState('admin');
+  const [email, setEmail] = useState('admin@idl.ng');
+  const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -19,13 +19,11 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
     const errors: Record<string, string> = {};
     if (!email.trim()) {
       errors.email = 'Email is required.';
-    } else if (email !== 'admin' && email !== 'interiorductltd@gmail.com' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       errors.email = 'Enter a valid email address.';
     }
     if (!password) {
       errors.password = 'Password is required.';
-    } else if (password.length < 5) {
-      errors.password = 'Password must be at least 5 characters.';
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -66,7 +64,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
             <Input
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="admin or interiorductltd@gmail.com"
+              placeholder="admin@idl.ng"
               type="text"
               required
               className={fieldErrors.email ? 'border-rose-500' : ''}
@@ -88,7 +86,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</Button>
         </form>
-        <p className="mt-4 text-xs text-slate-500">Demo: Use email "admin" and password "admin"</p>
+        <p className="mt-4 text-xs text-slate-500">Default Credentials: admin@idl.ng / password123 (or use finance@idl.ng, accounts@idl.ng, sales@idl.ng, inventory@idl.ng, maintenance@idl.ng, auditor@idl.ng)</p>
       </div>
     </div>
   );
