@@ -7,7 +7,17 @@ const jwtSecret = process.env.JWT_SECRET || 'change-this-secret';
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+  let token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+
+  // Fallback: check query parameter for token (for iframes/downloads)
+  if (!token && req.query.token) {
+    const queryToken = req.query.token;
+    if (typeof queryToken === 'string') {
+      token = queryToken;
+    } else if (Array.isArray(queryToken) && queryToken.length > 0 && typeof queryToken[0] === 'string') {
+      token = queryToken[0];
+    }
+  }
 
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized: token required.' });

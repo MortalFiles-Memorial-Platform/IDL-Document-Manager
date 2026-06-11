@@ -3,7 +3,23 @@ import { api } from '../lib/api';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { Input } from '../../ui/input';
+import { getToken } from '../lib/auth';
 import BackButton from '../components/BackButton';
+
+const downloadFile = async (url: string, filename: string) => {
+  try {
+    const response = await api.get(url, { responseType: 'blob' });
+    const blob = new Blob([response.data]);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  } catch (error) {
+    console.error('Download failed:', error);
+    alert('Failed to download file');
+  }
+};
 
 const documentTypes = [
   'SALES_RECEIPT',
@@ -312,7 +328,14 @@ export default function DocumentsPage() {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Failed to create document:', error);
-      setErrorMessage(`Failed to create document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      if (error instanceof Error && error.message.includes('401')) {
+        setErrorMessage('Session expired. Please log in again.');
+        localStorage.removeItem('idl_ris_token');
+        window.location.href = '/';
+      } else {
+        const details = error instanceof Error ? error.message : (error as any)?.response?.data?.message || 'Unknown error';
+        setErrorMessage(`Failed to create document: ${details}`);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -389,18 +412,10 @@ export default function DocumentsPage() {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button onClick={() => openPreview(doc)}>Preview</Button>
-                  <a className="inline-flex items-center justify-center rounded-2xl bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700" href={`/api/documents/${doc.id}/pdf`} target="_blank" rel="noreferrer">
-                    PDF
-                  </a>
-                  <a className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700" href={`/api/documents/${doc.id}/image?format=png`} target="_blank" rel="noreferrer">
-                    PNG
-                  </a>
-                  <a className="inline-flex items-center justify-center rounded-2xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700" href={`/api/documents/${doc.id}/image?format=jpg`} target="_blank" rel="noreferrer">
-                    JPG
-                  </a>
-                  <a className="inline-flex items-center justify-center rounded-2xl bg-slate-600 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700" href={`/api/documents/${doc.id}/pdf?style=pos`} target="_blank" rel="noreferrer">
-                    Receipt
-                  </a>
+                  <Button onClick={() => downloadFile(`/documents/${doc.id}/pdf`, `${doc.reference}.pdf`)} className="bg-brand-600 hover:bg-brand-700">PDF</Button>
+                  <Button onClick={() => downloadFile(`/documents/${doc.id}/image?format=png`, `${doc.reference}.png`)} className="bg-blue-600 hover:bg-blue-700">PNG</Button>
+                  <Button onClick={() => downloadFile(`/documents/${doc.id}/image?format=jpg`, `${doc.reference}.jpg`)} className="bg-amber-600 hover:bg-amber-700">JPG</Button>
+                  <Button onClick={() => downloadFile(`/documents/${doc.id}/pdf?style=pos`, `${doc.reference}_receipt.pdf`)} className="bg-slate-600 hover:bg-slate-700">Receipt</Button>
                 </div>
               </div>
             ))}
@@ -419,7 +434,7 @@ export default function DocumentsPage() {
               <button onClick={() => setPreviewDocumentId(null)} className="text-slate-500 hover:text-slate-900">✕</button>
             </div>
             <div className="h-[70vh] bg-slate-950">
-              <iframe src={`/api/documents/${previewDocumentId}/pdf`} className="h-full w-full" title="Document preview" />
+              <iframe src={`/api/documents/${previewDocumentId}/pdf?token=${getToken()}`} className="h-full w-full" title="Document preview" />
             </div>
           </div>
         </div>

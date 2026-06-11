@@ -35,6 +35,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.response?.status === 401 && !error.config._retry401) {
+      error.config._retry401 = true;
+      const { removeToken } = await import('./auth');
+      removeToken();
+      window.location.href = '/';
+      return Promise.reject(error);
+    }
+
     if (isGitHubPages() && error.config && !error.config._mockRetry) {
       const url = error.config.url || '';
 
