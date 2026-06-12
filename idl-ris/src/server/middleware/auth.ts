@@ -20,6 +20,7 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
   }
 
   if (!token) {
+    console.warn('No token found in headers or query parameters for:', req.method, req.path);
     return res.status(401).json({ message: 'Unauthorized: token required.' });
   }
 
@@ -28,12 +29,13 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
     req.user = {
       id: payload.userId,
       email: payload.email,
-      firstName: payload.firstName || '',
+      firstName: payload.firstName || 'User',
       lastName: payload.lastName || '',
       role: payload.role as any
     };
     return next();
   } catch (error) {
+    console.error('Token verification failed:', error instanceof Error ? error.message : error);
     return res.status(401).json({ message: 'Unauthorized: invalid token.' });
   }
 }

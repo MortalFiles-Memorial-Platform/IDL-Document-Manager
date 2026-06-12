@@ -24,7 +24,7 @@ export default function MobileNav({ user }: { user: UserProfile }) {
   return (
     <>
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-        <img src="/IDL-Document-Manager/logo.png" alt="IDL" className="h-8 w-8 rounded" />
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="IDL" className="h-8 w-8 rounded" />
         <button onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-slate-100 rounded-lg">
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>

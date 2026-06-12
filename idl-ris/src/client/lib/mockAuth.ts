@@ -5,40 +5,40 @@ const DEMO_USERS = [
     id: 1,
     email: 'admin@idl.ng',
     password: 'password123',
-    firstName: 'Admin',
-    lastName: 'User',
+    firstName: 'User',
+    lastName: 'Admin',
     role: 'ADMIN'
   },
   {
     id: 2,
     email: 'finance@idl.ng',
     password: 'password123',
-    firstName: 'Finance',
-    lastName: 'Officer',
+    firstName: 'User',
+    lastName: 'Finance',
     role: 'FINANCE'
   },
   {
     id: 3,
     email: 'sales@idl.ng',
     password: 'password123',
-    firstName: 'Sales',
-    lastName: 'Manager',
+    firstName: 'User',
+    lastName: 'Sales',
     role: 'SALES'
   },
   {
     id: 4,
     email: 'auditor@idl.ng',
     password: 'password123',
-    firstName: 'Audit',
-    lastName: 'Officer',
+    firstName: 'User',
+    lastName: 'Auditor',
     role: 'AUDITOR'
   },
   {
     id: 5,
     email: 'inventory@idl.ng',
     password: 'password123',
-    firstName: 'Inventory',
-    lastName: 'Manager',
+    firstName: 'User',
+    lastName: 'Procurement',
     role: 'PROCUREMENT'
   }
 ];

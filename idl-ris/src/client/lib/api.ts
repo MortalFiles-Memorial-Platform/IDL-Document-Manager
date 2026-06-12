@@ -21,7 +21,8 @@ export const api = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 30000
 });
 
 api.interceptors.request.use((config) => {
@@ -35,12 +36,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Handle 401 Unauthorized
     if (error.response?.status === 401 && !error.config._retry401) {
       error.config._retry401 = true;
       const { removeToken } = await import('./auth');
       removeToken();
       window.location.href = '/';
       return Promise.reject(error);
+    }
+
+    // Handle network errors
+    if (!error.response) {
+      if (error.code === 'ECONNABORTED') {
+        error.message = 'Request timeout. Please check your connection.';
+      } else if (!navigator.onLine) {
+        error.message = 'No internet connection. Please check your network.';
+      } else {
+        error.message = 'Network error. Please try again.';
+      }
     }
 
     if (isGitHubPages() && error.config && !error.config._mockRetry) {
@@ -74,8 +87,8 @@ api.interceptors.response.use(
           const user = mockAuthService['_findUser']?.(decodedEmail) || {
             id: 1,
             email: decodedEmail,
-            firstName: 'Admin',
-            lastName: 'User',
+            firstName: 'User',
+            lastName: 'Admin',
             role: 'ADMIN'
           };
           return Promise.resolve({

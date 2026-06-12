@@ -2,6 +2,7 @@ import { Router } from 'express';
 import prisma from '../db';
 import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/roles';
+import { authorizeDocumentAccess, canAccessDocumentType } from '../middleware/documentRbac';
 import { createQRCodeDataUri } from '../utils/qrcode';
 import { buildDocumentPdf } from '../utils/pdf';
 import { generateDocumentImage } from '../utils/image';
@@ -14,11 +15,18 @@ const router = Router();
 router.use(authenticateToken);
 
 router.get('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT', 'AUDITOR'), async (req: AuthRequest, res) => {
-  const docs = await prisma.document.findMany({ include: { customer: true, supplier: true, lineItems: true }, orderBy: { createdAt: 'desc' } });
-  res.json(docs);
+  const userRole = req.user?.role;
+  const docs = await prisma.document.findMany({ 
+    include: { customer: true, supplier: true, lineItems: true }, 
+    orderBy: { createdAt: 'desc' } 
+  });
+  
+  // Filter documents based on user's role and document type access
+  const filteredDocs = docs.filter(doc => canAccessDocumentType(userRole || '', doc.docType));
+  res.json(filteredDocs);
 });
 
-router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req: AuthRequest, res) => {
+router.post('/', authorizeDocumentAccess, authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), async (req: AuthRequest, res) => {
   try {
     const { docType, reference, customerId, supplierId, issueDate, dueDate, transactionStatus, signedBy, customerSignatureUrl, lineItems, amountPaid, transactionStatus: statusValue } = req.body;
     const parsedItems = Array.isArray(lineItems) ? lineItems.map((item: any) => ({
@@ -86,13 +94,20 @@ router.post('/', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT'), asy
   }
 });
 
-router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
+router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT', 'AUDITOR'), async (req: AuthRequest, res) => {
   try {
     const id = Number(req.params.id);
     const posStyle = req.query.style === 'pos';
+    const userRole = req.user?.role;
+    
     const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
     if (!document) {
       return res.status(404).json({ message: 'Document not found.' });
+    }
+
+    // Check if user has access to this document type
+    if (!canAccessDocumentType(userRole || '', document.docType)) {
+      return res.status(403).json({ message: 'Forbidden: insufficient permissions to access this document type.' });
     }
 
     const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
@@ -114,10 +129,11 @@ router.get('/:id/pdf', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), a
   }
 });
 
-router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'), async (req: AuthRequest, res) => {
+router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMENT', 'AUDITOR'), async (req: AuthRequest, res) => {
   try {
     const id = Number(req.params.id);
     const format = (req.query.format as string) || 'png';
+    const userRole = req.user?.role;
 
     if (!['png', 'jpg', 'jpeg'].includes(format.toLowerCase())) {
       return res.status(400).json({ message: 'Invalid format. Use png or jpg.' });
@@ -126,6 +142,11 @@ router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'AUDITOR'),
     const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
     if (!document) {
       return res.status(404).json({ message: 'Document not found.' });
+    }
+
+    // Check if user has access to this document type
+    if (!canAccessDocumentType(userRole || '', document.docType)) {
+      return res.status(403).json({ message: 'Forbidden: insufficient permissions to access this document type.' });
     }
 
     const imageSvg = generateDocumentImage({ document: document as any, customer: document.customer, supplier: document.supplier, format: format.toLowerCase() as 'png' | 'jpg' });
@@ -153,9 +174,16 @@ router.post('/:id/send-email', authorizeRoles('ADMIN', 'SALES', 'FINANCE'), asyn
   try {
     const id = Number(req.params.id);
     const { to, subject, message } = req.body;
+    const userRole = req.user?.role;
+    
     const document = await prisma.document.findUnique({ where: { id }, include: { customer: true, supplier: true, lineItems: true } });
     if (!document) {
       return res.status(404).json({ message: 'Document not found.' });
+    }
+
+    // Check if user has access to this document type
+    if (!canAccessDocumentType(userRole || '', document.docType)) {
+      return res.status(403).json({ message: 'Forbidden: insufficient permissions to access this document type.' });
     }
 
     const qrCodeUri = await createQRCodeDataUri(document.qrCodeData || JSON.stringify({ reference: document.reference }));
