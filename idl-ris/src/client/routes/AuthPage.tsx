@@ -61,8 +61,14 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
         <div className="mb-6 flex justify-center">
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Interior Duct Ltd" className="h-16 w-16" />
         </div>
-        <h1 className="text-3xl font-semibold text-slate-900">Interior Duct Ltd Login</h1>
-        <p className="mt-2 text-sm text-slate-500">Access the IDL-RIS business document manager and stay compliant with Nigerian financial workflows.</p>
+        <div className="text-center">
+          <h1 className="text-3xl font-semibold text-slate-900">
+            Interior Duct Ltd
+            <br />
+            <span className="block">Login</span>
+          </h1>
+          <p className="mt-4 text-sm text-slate-500">Access the IDL-RIS business document manager and stay compliant with Nigerian financial workflows.</p>
+        </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>

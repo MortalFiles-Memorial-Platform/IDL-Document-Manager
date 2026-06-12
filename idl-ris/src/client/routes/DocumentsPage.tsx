@@ -217,21 +217,21 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
             <div key={index} className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 md:grid-cols-3">
               <label className="block text-sm font-medium text-slate-700">
                 Description
-                <Input className="mt-1" value={item.description} onChange={(e) => handleItemChange(index, 'description', e.target.value)} placeholder={isVoucher ? 'Expense description' : 'Item description'} />
+                <Input className="mt-1" value={item.description} onChange={(e) => handleItemChange(index, 'description', e.target.value)} placeholder={isVoucher ? 'Expense (e.g., office supplies)' : 'Item (e.g., service description)'} />
               </label>
               <label className="block text-sm font-medium text-slate-700">
                 Qty
-                <Input className="mt-1" type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))} placeholder="e.g., 5" min="0" step="0.01" />
+                <Input className="mt-1" type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))} placeholder="Enter quantity" min="0" step="0.01" />
               </label>
               <label className="block text-sm font-medium text-slate-700">
                 Unit Price
-                <Input className="mt-1" type="number" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))} placeholder="e.g., 1000.00" min="0" step="0.01" />
+                <Input className="mt-1" type="number" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))} placeholder="Enter price" min="0" step="0.01" />
               </label>
               {!isVoucher && (
                 <>
                   <label className="block text-sm font-medium text-slate-700">
                     Discount
-                    <Input className="mt-1" type="number" value={item.discount} onChange={(e) => handleItemChange(index, 'discount', Number(e.target.value))} placeholder="e.g., 50.00" min="0" step="0.01" />
+                    <Input className="mt-1" type="number" value={item.discount} onChange={(e) => handleItemChange(index, 'discount', Number(e.target.value))} placeholder="Enter discount" min="0" step="0.01" />
                   </label>
                   <label className="block text-sm font-medium text-slate-700">
                     VAT (%)
@@ -243,7 +243,7 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
                       max="100"
                       value={item.vat}
                       onChange={(e) => handleItemChange(index, 'vat', Number(e.target.value))}
-                      placeholder="e.g., 7.5"
+                      placeholder="Enter VAT %"
                     />
                   </label>
                 </>

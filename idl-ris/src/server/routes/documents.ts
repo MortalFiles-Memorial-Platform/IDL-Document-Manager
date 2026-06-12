@@ -149,7 +149,7 @@ router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMEN
       return res.status(403).json({ message: 'Forbidden: insufficient permissions to access this document type.' });
     }
 
-    const imageSvg = generateDocumentImage({ document: document as any, customer: document.customer, supplier: document.supplier, format: format.toLowerCase() as 'png' | 'jpg' });
+    const imageSvgBuffer = await generateDocumentImage({ document: document as any, customer: document.customer, supplier: document.supplier, format: format.toLowerCase() as 'png' | 'jpg' });
 
     // Set proper headers for image download
     const fileExtension = format.toLowerCase() === 'jpg' ? 'jpg' : 'png';
@@ -157,13 +157,13 @@ router.get('/:id/image', authorizeRoles('ADMIN', 'SALES', 'FINANCE', 'PROCUREMEN
     const contentType = format.toLowerCase() === 'jpg' ? 'image/jpeg' : 'image/png';
 
     res.setHeader('Content-Type', contentType);
-    res.setHeader('Content-Length', imageSvg.length);
+    res.setHeader('Content-Length', imageSvgBuffer.length);
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
 
-    res.send(imageSvg);
+    res.send(imageSvgBuffer);
   } catch (error) {
     console.error('Image generation error:', error);
     res.status(500).json({ message: 'Failed to generate image', error: error instanceof Error ? error.message : 'Unknown error' });

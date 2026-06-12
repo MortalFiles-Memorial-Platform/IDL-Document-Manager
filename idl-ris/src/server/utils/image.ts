@@ -1,4 +1,5 @@
 import { type Document as DocumentModel, type DocumentLineItem, type Customer, type Supplier } from '@prisma/client';
+import sharp from 'sharp';
 
 interface ImageGenerationPayload {
   document: DocumentModel & { lineItems: DocumentLineItem[] };
@@ -138,10 +139,21 @@ function generateDocumentSvg(payload: ImageGenerationPayload): string {
   return svg;
 }
 
-export function generateDocumentImage(payload: ImageGenerationPayload): Buffer {
+export async function generateDocumentImage(payload: ImageGenerationPayload): Promise<Buffer> {
   const svg = generateDocumentSvg(payload);
-  const buffer = Buffer.from(svg, 'utf-8');
-  return buffer;
+  const svgBuffer = Buffer.from(svg, 'utf-8');
+  
+  const { format } = payload;
+  
+  if (format === 'jpg') {
+    return await sharp(svgBuffer)
+      .jpeg({ quality: 90, progressive: true })
+      .toBuffer();
+  } else {
+    return await sharp(svgBuffer)
+      .png({ compressionLevel: 9 })
+      .toBuffer();
+  }
 }
 
 export function generateDocumentImageAsBase64(payload: ImageGenerationPayload): string {
