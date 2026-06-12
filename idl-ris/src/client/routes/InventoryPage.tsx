@@ -27,14 +27,14 @@ export default function InventoryPage() {
         <h2 className="text-xl font-semibold text-slate-900">Inventory Management</h2>
         <p className="mt-2 text-sm text-slate-500">Track raw materials, finished furniture stock, upholstery supplies, and maintenance inventory.</p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Input placeholder="SKU" value={form.sku} onChange={(event) => setForm({ ...form, sku: event.target.value })} />
-          <Input placeholder="Item name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
-          <Input placeholder="Category" value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} />
-          <Input placeholder="Unit" value={form.unit} onChange={(event) => setForm({ ...form, unit: event.target.value })} />
-          <Input placeholder="Unit price" type="number" value={form.unitPrice} onChange={(event) => setForm({ ...form, unitPrice: Number(event.target.value) })} />
-          <Input placeholder="Quantity" type="number" value={form.quantity} onChange={(event) => setForm({ ...form, quantity: Number(event.target.value) })} />
-          <Input placeholder="Reorder level" type="number" value={form.reorderLevel} onChange={(event) => setForm({ ...form, reorderLevel: Number(event.target.value) })} />
-          <Input placeholder="Location" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} />
+          <Input placeholder="SKU (e.g., FRN-001)" value={form.sku} onChange={(event) => setForm({ ...form, sku: event.target.value })} />
+          <Input placeholder="Item name (e.g., Leather Sofa)" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+          <Input placeholder="Category (e.g., Furniture)" value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} />
+          <Input placeholder="Unit (e.g., pcs, meters, kg)" value={form.unit} onChange={(event) => setForm({ ...form, unit: event.target.value })} />
+          <Input placeholder="Unit price (e.g., 15000.00)" type="number" value={form.unitPrice} onChange={(event) => setForm({ ...form, unitPrice: Number(event.target.value) })} min="0" step="0.01" />
+          <Input placeholder="Quantity (e.g., 10)" type="number" value={form.quantity} onChange={(event) => setForm({ ...form, quantity: Number(event.target.value) })} min="0" step="0.01" />
+          <Input placeholder="Reorder level (e.g., 5)" type="number" value={form.reorderLevel} onChange={(event) => setForm({ ...form, reorderLevel: Number(event.target.value) })} min="0" step="1" />
+          <Input placeholder="Location (e.g., Warehouse A, Shelf 3)" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} />
         </div>
         <div className="mt-4">
           <Button type="button" onClick={handleSave}>Add inventory item</Button>

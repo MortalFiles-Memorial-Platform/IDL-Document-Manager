@@ -27,10 +27,10 @@ export default function LoansPage() {
         <h2 className="text-xl font-semibold text-slate-900">Loan Tracking</h2>
         <p className="mt-2 text-sm text-slate-500">Manage working capital loans, repayment schedules, and auditing documents for financing operations.</p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Input placeholder="Borrower" value={form.borrower} onChange={(event) => setForm({ ...form, borrower: event.target.value })} />
-          <Input placeholder="Currency" value={form.currency} onChange={(event) => setForm({ ...form, currency: event.target.value })} />
-          <Input placeholder="Principal" type="number" value={form.principal} onChange={(event) => setForm({ ...form, principal: Number(event.target.value) })} />
-          <Input placeholder="Interest rate (%)" type="number" value={form.interestRate} onChange={(event) => setForm({ ...form, interestRate: Number(event.target.value) })} />
+          <Input placeholder="Borrower name" value={form.borrower} onChange={(event) => setForm({ ...form, borrower: event.target.value })} />
+          <Input placeholder="Currency (e.g., NGN, USD)" value={form.currency} onChange={(event) => setForm({ ...form, currency: event.target.value })} />
+          <Input placeholder="Principal amount (e.g., 500000.00)" type="number" value={form.principal} onChange={(event) => setForm({ ...form, principal: Number(event.target.value) })} min="0" step="0.01" />
+          <Input placeholder="Interest rate (e.g., 12.5)" type="number" value={form.interestRate} onChange={(event) => setForm({ ...form, interestRate: Number(event.target.value) })} min="0" step="0.01" />
           <Input placeholder="Due date" type="date" value={form.dueDate} onChange={(event) => setForm({ ...form, dueDate: event.target.value })} />
         </div>
         <div className="mt-4">

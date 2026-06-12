@@ -189,7 +189,7 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-medium text-slate-700">
             Amount {isReceipt ? 'Received' : 'Paid'} (NGN)
-            <Input className="mt-1" type="number" value={amountPaid} onChange={(e) => setAmountPaid(Number(e.target.value))} />
+            <Input className="mt-1" type="number" value={amountPaid} onChange={(e) => setAmountPaid(Number(e.target.value))} placeholder="e.g., 50000.00" min="0" step="0.01" />
           </label>
           <label className="block text-sm font-medium text-slate-700">
             Status
@@ -221,17 +221,17 @@ function DocumentForm({ docType, onSubmit }: { docType: string; onSubmit: (data:
               </label>
               <label className="block text-sm font-medium text-slate-700">
                 Qty
-                <Input className="mt-1" type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))} />
+                <Input className="mt-1" type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))} placeholder="e.g., 5" min="0" step="0.01" />
               </label>
               <label className="block text-sm font-medium text-slate-700">
                 Unit Price
-                <Input className="mt-1" type="number" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))} />
+                <Input className="mt-1" type="number" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', Number(e.target.value))} placeholder="e.g., 1000.00" min="0" step="0.01" />
               </label>
               {!isVoucher && (
                 <>
                   <label className="block text-sm font-medium text-slate-700">
                     Discount
-                    <Input className="mt-1" type="number" value={item.discount} onChange={(e) => handleItemChange(index, 'discount', Number(e.target.value))} />
+                    <Input className="mt-1" type="number" value={item.discount} onChange={(e) => handleItemChange(index, 'discount', Number(e.target.value))} placeholder="e.g., 50.00" min="0" step="0.01" />
                   </label>
                   <label className="block text-sm font-medium text-slate-700">
                     VAT (%)

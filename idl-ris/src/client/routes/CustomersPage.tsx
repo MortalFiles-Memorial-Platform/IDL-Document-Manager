@@ -87,20 +87,20 @@ export default function CustomersPage() {
         <p className="mt-2 text-sm text-slate-500">Capture customers, contacts, and billing information for furniture sales, upholstery, welding, and training customers.</p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div>
-            <Input placeholder="Customer name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className={formErrors.name ? 'border-rose-500' : ''} />
+            <Input placeholder="Customer name (e.g., ABC Enterprises Ltd)" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className={formErrors.name ? 'border-rose-500' : ''} />
             {formErrors.name && <p className="mt-1 text-xs text-rose-600">{formErrors.name}</p>}
           </div>
           <div>
-            <Input placeholder="Email" value={form.contactEmail} onChange={(event) => setForm({ ...form, contactEmail: event.target.value })} className={formErrors.contactEmail ? 'border-rose-500' : ''} />
+            <Input placeholder="Email (e.g., contact@customer.com)" value={form.contactEmail} onChange={(event) => setForm({ ...form, contactEmail: event.target.value })} className={formErrors.contactEmail ? 'border-rose-500' : ''} />
             {formErrors.contactEmail && <p className="mt-1 text-xs text-rose-600">{formErrors.contactEmail}</p>}
           </div>
           <div>
-            <Input placeholder="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className={formErrors.phone ? 'border-rose-500' : ''} />
+            <Input placeholder="Phone (e.g., +234 803 456 7890)" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className={formErrors.phone ? 'border-rose-500' : ''} />
             {formErrors.phone && <p className="mt-1 text-xs text-rose-600">{formErrors.phone}</p>}
           </div>
-          <Input placeholder="TIN" value={form.tin} onChange={(event) => setForm({ ...form, tin: event.target.value })} />
-          <Input placeholder="Address" value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} />
-          <Input placeholder="Notes" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
+          <Input placeholder="TIN (e.g., TIN001234)" value={form.tin} onChange={(event) => setForm({ ...form, tin: event.target.value })} />
+          <Input placeholder="Address (e.g., 123 Marina Street, Lagos, Nigeria)" value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} />
+          <Input placeholder="Notes (optional)" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
         </div>
         <div className="mt-4">
           <Button type="button" onClick={handleSave} disabled={saving}>
