@@ -2,7 +2,9 @@ services:
   - type: web
     name: idl-ris
     runtime: node
-    buildCommand: npm run build
+    # Build command: generate Prisma client before TypeScript compilation
+    # Uses fallback DATABASE_URL if not set, to prevent schema validation errors
+    buildCommand: npm ci && (npm run db:generate || (export DATABASE_URL=postgresql://localhost/temp && npm run db:generate)) && npm run build:client && npm run build:server
     startCommand: npm run db:migrate:deploy && npm run start
     envVars:
       - key: NODE_ENV
