@@ -34,6 +34,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Admin',
       role: 'ADMIN',
+      department: 'ADMIN',
     },
     {
       email: 'finance@idl.ng',
@@ -41,6 +42,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Finance',
       role: 'FINANCE',
+      department: 'FINANCE',
     },
     {
       email: 'accounts@idl.ng',
@@ -48,6 +50,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Accounts',
       role: 'FINANCE',
+      department: 'FINANCE',
     },
     {
       email: 'sales@idl.ng',
@@ -55,6 +58,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Sales',
       role: 'SALES',
+      department: 'SALES',
     },
     {
       email: 'inventory@idl.ng',
@@ -62,6 +66,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Procurement',
       role: 'PROCUREMENT',
+      department: 'PROCUREMENT',
     },
     {
       email: 'maintenance@idl.ng',
@@ -69,6 +74,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Procurement',
       role: 'PROCUREMENT',
+      department: 'PROCUREMENT',
     },
     {
       email: 'auditor@idl.ng',
@@ -76,6 +82,7 @@ async function main() {
       firstName: 'User',
       lastName: 'Auditor',
       role: 'AUDITOR',
+      department: 'AUDITOR',
     },
   ];
 

@@ -4,6 +4,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   role: string;
+  department?: string;
 }
 
 export interface DocumentType {

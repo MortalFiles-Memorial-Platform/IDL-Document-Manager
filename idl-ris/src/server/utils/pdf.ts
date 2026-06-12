@@ -150,18 +150,32 @@ export function buildDocumentPdf(payload: PdfDocumentPayload) {
 
     // Add logo at the top
     const logoPath = path.join(__dirname, '../../public/logo.png');
+    let logoAdded = false;
     if (fs.existsSync(logoPath)) {
       try {
-        doc.image(logoPath, { fit: [60, 60] });
-        doc.moveDown(0.3);
+        doc.image(logoPath, { fit: [80, 80], align: 'center' });
+        doc.moveDown(0.5);
+        logoAdded = true;
       } catch (error) {
         console.warn('Could not load logo image:', error);
       }
+    } else {
+      // Try alternative path if public folder is in the build directory
+      const altLogoPath = path.join(__dirname, '../public/logo.png');
+      if (fs.existsSync(altLogoPath)) {
+        try {
+          doc.image(altLogoPath, { fit: [80, 80], align: 'center' });
+          doc.moveDown(0.5);
+          logoAdded = true;
+        } catch (error) {
+          console.warn('Could not load logo from alt path:', error);
+        }
+      }
     }
 
-    doc.fontSize(20).fillColor('#0f172a').text('Interior Duct Ltd', { align: 'left' });
-    doc.moveDown(0.4);
-    doc.fontSize(14).fillColor('#334155').text(document.docType.replace(/_/g, ' '), { align: 'left' });
+    doc.fontSize(20).fillColor('#0f172a').text('Interior Duct Ltd', { align: 'center' });
+    doc.moveDown(0.2);
+    doc.fontSize(14).fillColor('#334155').text(document.docType.replace(/_/g, ' '), { align: 'center' });
     doc.moveDown(0.5);
 
     doc.fontSize(10).fillColor('#475569');
@@ -171,20 +185,26 @@ export function buildDocumentPdf(payload: PdfDocumentPayload) {
       doc.text(`Due Date: ${document.dueDate.toISOString().split('T')[0]}`);
     }
     doc.text(`Status: ${document.status}`);
-    doc.text(`Approval Status: ${document.approvalStatus}`);
-    doc.moveDown();
+    doc.moveDown(0.5);
 
-    const group = doc.fontSize(10).fillColor('#0f172a');
-    group.text('Bill To:', { continued: true }).text(customer?.name || supplier?.name || 'N/A');
-    if (customer) {
-      doc.text(customer.address);
-      doc.text(`Email: ${customer.contactEmail}`);
-      doc.text(`Phone: ${customer.phone}`);
-    }
-    if (supplier) {
-      doc.text(supplier.address);
-      doc.text(`Email: ${supplier.contactEmail}`);
-      doc.text(`Phone: ${supplier.phone}`);
+    // Only show "Bill To" for specific document types (not for receipts)
+    const isReceipt = document.docType.includes('RECEIPT');
+    const billToDocTypes = ['PROFORMA_INVOICE', 'SALES_INVOICE', 'PURCHASE_INVOICE', 'DELIVERY_NOTE', 'PURCHASE_RECEIPT', 'QUOTATION'];
+    const shouldShowBillTo = !isReceipt || billToDocTypes.some(type => document.docType.includes(type));
+    
+    if (shouldShowBillTo) {
+      const group = doc.fontSize(10).fillColor('#0f172a');
+      group.text('Bill To: ', { continued: true }).fillColor('#334155').text(customer?.name || supplier?.name || '');
+      if (customer) {
+        doc.text(customer.address);
+        doc.text(`Email: ${customer.contactEmail}`);
+        doc.text(`Phone: ${customer.phone}`);
+      }
+      if (supplier) {
+        doc.text(supplier.address);
+        doc.text(`Email: ${supplier.contactEmail}`);
+        doc.text(`Phone: ${supplier.phone}`);
+      }
     }
     doc.moveDown(1);
 
@@ -212,7 +232,7 @@ export function buildDocumentPdf(payload: PdfDocumentPayload) {
         Number(line.total).toFixed(2)
       ];
       values.forEach((value, index) => {
-        doc.font('Helvetica').fontSize(9).text(value, x, doc.y, { width: columnWidths[index], continued: false });
+        doc.font('Courier').fontSize(9).text(value, x, doc.y, { width: columnWidths[index], continued: false });
         x += columnWidths[index];
       });
       doc.moveDown(0.3);

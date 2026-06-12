@@ -21,12 +21,12 @@ router.post('/login', async (req, res) => {
   }
 
   const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName },
+    { userId: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName, department: user.department },
     jwtSecret,
     { expiresIn: jwtExpiresIn } as SignOptions
   );
 
-  return res.json({ token, user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role } });
+  return res.json({ token, user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, department: user.department } });
 });
 
 router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
@@ -36,7 +36,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
   if (!user) {
     return res.status(404).json({ message: 'User not found.' });
   }
-  return res.json({ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role });
+  return res.json({ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, department: user.department });
 });
 
 router.post('/verify-email', async (req, res) => {

@@ -31,7 +31,8 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
       email: payload.email,
       firstName: payload.firstName || 'User',
       lastName: payload.lastName || '',
-      role: payload.role as any
+      role: payload.role as any,
+      department: payload.department as any
     };
     return next();
   } catch (error) {

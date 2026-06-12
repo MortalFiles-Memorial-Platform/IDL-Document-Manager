@@ -2,7 +2,7 @@ import type { Request } from 'express';
 import type { User } from '@prisma/client';
 
 export interface AuthRequest extends Request {
-  user?: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'role'>;
+  user?: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'role' | 'department'>;
 }
 
 export interface JwtPayload {
@@ -11,4 +11,5 @@ export interface JwtPayload {
   role: string;
   firstName: string;
   lastName: string;
+  department?: string;
 }

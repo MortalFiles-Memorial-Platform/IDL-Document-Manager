@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,6 +15,7 @@ model User {
   firstName     String
   lastName      String
   role          String           @default("SALES")
+  department    String?          // Maps to role for access control: ADMIN, SALES, FINANCE, PROCUREMENT, AUDITOR
   isActive      Boolean          @default(true)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt

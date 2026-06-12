@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: 'demo@interiorduct.com',
     firstName: 'Demo',
     lastName: 'User',
-    role: 'ADMIN'
+    role: 'ADMIN',
+    department: 'ADMIN'
   };
 
   const [user, setUser] = useState<UserProfile | null>(BYPASS_AUTH ? defaultDemoUser : null);
