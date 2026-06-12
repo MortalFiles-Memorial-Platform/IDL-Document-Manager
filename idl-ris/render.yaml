@@ -8,8 +8,11 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        # Safe dummy URL for build phase - prevents Prisma schema validation errors
-        value: postgresql://postgres:temp@localhost:5432/temp?schema=public
+        # Set from Render environment at runtime
+        sync: false
       - key: DIRECT_URL
-        # Safe dummy URL for build phase
-        value: postgresql://postgres:temp@localhost:5432/temp
+        # Set from Render environment at runtime
+        sync: false
+      - key: JWT_SECRET
+        # Set from Render environment at runtime
+        sync: false
