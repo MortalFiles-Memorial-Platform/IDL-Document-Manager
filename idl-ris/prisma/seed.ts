@@ -9,10 +9,22 @@ async function main() {
   // Hash password for all users
   const hashedPassword = bcrypt.hashSync('password123', 10);
 
-  // Clear existing data
+  // Clear existing data (in proper order to respect foreign keys)
+  // Delete dependent records first
+  await prisma.documentLineItem.deleteMany({});
+  await prisma.document.deleteMany({});
+  await prisma.journalEntry.deleteMany({});
+  await prisma.expense.deleteMany({});
+  await prisma.loanRepayment.deleteMany({});
+  await prisma.loan.deleteMany({});
+  await prisma.auditLog.deleteMany({});
+  
+  // Then delete parent records
   await prisma.user.deleteMany({});
   await prisma.customer.deleteMany({});
   await prisma.supplier.deleteMany({});
+  await prisma.inventoryItem.deleteMany({});
+  await prisma.chartOfAccounts.deleteMany({});
 
   // Create users for each role/department
   const users = [

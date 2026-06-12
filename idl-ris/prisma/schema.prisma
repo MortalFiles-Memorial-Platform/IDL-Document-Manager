@@ -74,7 +74,7 @@ model Expense {
   paidBy     String
   status     String       @default("PENDING")
   notes      String?
-  createdBy  User         @relation(fields: [createdById], references: [id])
+  createdBy  User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById Int
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -129,9 +129,9 @@ model Document {
   qrCodeData           String?
   lineItems            DocumentLineItem[]
   journalEntries       JournalEntry[]
-  createdBy            User               @relation("CreatedBy", fields: [createdById], references: [id])
+  createdBy            User               @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   createdById          Int
-  approvedBy           User?              @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedBy           User?              @relation("ApprovedBy", fields: [approvedById], references: [id], onDelete: Cascade)
   approvedById         Int?
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
@@ -155,7 +155,7 @@ model AuditLog {
   action    String
   entity    String
   entityId  Int?
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int?
   timestamp DateTime @default(now())
   details   String?
@@ -187,7 +187,7 @@ model JournalEntry {
   documentId      Int?
   debitAccount    ChartOfAccounts @relation("Debit", fields: [debitAccountId], references: [id])
   creditAccount   ChartOfAccounts @relation("Credit", fields: [creditAccountId], references: [id])
-  createdBy       User            @relation(fields: [createdById], references: [id])
+  createdBy       User            @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById     Int
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
