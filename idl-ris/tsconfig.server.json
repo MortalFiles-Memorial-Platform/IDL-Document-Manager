@@ -6,7 +6,9 @@
     "outDir": "dist/server",
     "rootDir": "src/server",
     "types": ["node"],
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "5.0",
+    "skipLibCheck": true,
+    "noEmit": false
   },
   "include": ["src/server/**/*"]
 }
