@@ -3,7 +3,11 @@ set -e
 
 echo "Starting deployment..."
 cd idl-ris
-echo "Running migrations..."
-npm run db:migrate:deploy
+
+echo "Running Prisma migrations..."
+npm run db:migrate:deploy || {
+  echo "⚠ Migration failed, but attempting to continue..."
+}
+
 echo "Starting server..."
-node dist/server.js
+exec node dist/server.js
