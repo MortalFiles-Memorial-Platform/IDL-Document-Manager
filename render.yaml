@@ -3,7 +3,7 @@ services:
     name: idl-ris
     runtime: node
     buildCommand: cd idl-ris && npm ci && npm run db:generate && npm run build
-    startCommand: cd idl-ris && npx prisma migrate deploy --schema ./prisma/schema.prisma && npm run start
+    startCommand: cd idl-ris && npm run db:migrate:deploy && npm run start
     envVars:
       - key: NODE_ENV
         value: production
